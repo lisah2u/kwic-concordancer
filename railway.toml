@@ -1,6 +1,6 @@
 [deploy]
 # Start command for Railway deployment
-startCommand = "python -m uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
+startCommand = "python3 -m uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
 
 [env]
 # Environment variables for Railway
