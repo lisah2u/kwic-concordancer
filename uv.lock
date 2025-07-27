@@ -613,7 +613,7 @@ wheels = [
 ]
 
 [[package]]
-name = "spacy-demos"
+name = "kwic-concordancer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
