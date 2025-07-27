@@ -1,6 +1,7 @@
 """
 Minimal test FastAPI app for Railway deployment
 """
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,7 +18,13 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "KWIC Concordancer API", "status": "running"}
+    port = os.environ.get("PORT", "unknown")
+    return {
+        "message": "KWIC Concordancer API", 
+        "status": "running",
+        "port": port,
+        "environment": "railway"
+    }
 
 @app.get("/api")
 async def api_status():
@@ -26,3 +33,8 @@ async def api_status():
 @app.get("/corpora")
 async def list_corpora():
     return {"corpora": ["test-corpus"], "message": "Minimal test version"}
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
