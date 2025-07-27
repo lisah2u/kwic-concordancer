@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-import spacy
+# import spacy  # Temporarily removed for deployment testing
 from pathlib import Path
 import re
 from functools import lru_cache
@@ -162,7 +162,17 @@ async def root():
 @app.get("/api")
 async def api_status():
     """API status endpoint"""
-    return {"message": "Concordance API v1.0", "status": "running", "cors": "enabled"}
+    samples_dir = Path("samples")
+    samples_exist = samples_dir.exists()
+    sample_count = len(list(samples_dir.glob("*.txt"))) if samples_exist else 0
+    
+    return {
+        "message": "Concordance API v1.0", 
+        "status": "running", 
+        "cors": "enabled",
+        "samples_directory": samples_exist,
+        "sample_files": sample_count
+    }
 
 
 @app.get("/cache/status")
