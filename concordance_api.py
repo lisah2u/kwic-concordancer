@@ -25,9 +25,9 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # CORS middleware for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=False,  # Set to False when using wildcard
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -178,7 +178,7 @@ async def favicon():
 @app.get("/api")
 async def api_status():
     """API status endpoint"""
-    return {"message": "Concordance API v1.0", "status": "running"}
+    return {"message": "Concordance API v1.0", "status": "running", "cors": "enabled"}
 
 
 @app.get("/cache/status")
