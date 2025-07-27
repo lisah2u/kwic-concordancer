@@ -27,7 +27,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for now
     allow_credentials=False,  # Set to False when using wildcard
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -77,6 +77,10 @@ class FileContent(BaseModel):
 
 def load_corpus(corpus_name: str) -> List[str]:
     """Load corpus from samples directory with intelligent caching"""
+    # Basic security: prevent path traversal
+    if ".." in corpus_name or "/" in corpus_name or "\\" in corpus_name:
+        raise HTTPException(status_code=400, detail="Invalid corpus name")
+    
     corpus_path = Path("samples") / f"{corpus_name}.txt"
     
     if not corpus_path.exists():
