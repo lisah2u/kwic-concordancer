@@ -1,0 +1,27 @@
+[build]
+# Use Nixpacks for automatic detection
+nixpacks = true
+
+[deploy]
+# Start command for Railway deployment
+startCommand = "uv run uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
+
+# Health check endpoint
+healthcheckPath = "/api"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[env]
+# Environment variables for Railway
+PORT = "8000"
+PYTHONPATH = "."
+UV_SYSTEM_PYTHON = "1"
+
+# Development vs Production environment detection
+RAILWAY_ENVIRONMENT = "${RAILWAY_ENVIRONMENT}"
+
+[build.watchPatterns]
+# Files to watch for rebuilds
+include = ["**/*.py", "requirements.txt", "pyproject.toml"]
+ignore = ["static/**", "samples/**", "test_*.py", "**/__pycache__/**"]

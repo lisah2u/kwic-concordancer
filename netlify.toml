@@ -1,0 +1,84 @@
+[build]
+  # Build command to generate Tailwind CSS
+  command = "npm run build-css"
+  
+  # Directory to publish (static files only)
+  publish = "static"
+
+[build.environment]
+  # Node.js version for Tailwind CSS build
+  NODE_VERSION = "18"
+
+# Redirect API calls to Railway backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://spacy-demos-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+# Redirect search endpoints to Railway backend
+[[redirects]]
+  from = "/search"
+  to = "https://spacy-demos-production.up.railway.app/search"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/search/*"
+  to = "https://spacy-demos-production.up.railway.app/search/:splat"
+  status = 200
+  force = true
+
+# Redirect corpus management to Railway backend
+[[redirects]]
+  from = "/corpora"
+  to = "https://spacy-demos-production.up.railway.app/corpora"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/view/*"
+  to = "https://spacy-demos-production.up.railway.app/view/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/search-in-file/*"
+  to = "https://spacy-demos-production.up.railway.app/search-in-file/:splat"
+  status = 200
+  force = true
+
+# Redirect cache management to Railway backend
+[[redirects]]
+  from = "/cache/*"
+  to = "https://spacy-demos-production.up.railway.app/cache/:splat"
+  status = 200
+  force = true
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Cache static assets for 1 year
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Don't cache HTML files
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Cache CSS and JS for 1 year with immutable
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

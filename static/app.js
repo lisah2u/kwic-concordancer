@@ -3,8 +3,21 @@
  * Handles search functionality and KWIC rendering
  */
 
-// Configuration - use relative URLs since frontend and backend are on same server
-const API_BASE_URL = '';
+// Configuration - detect environment for API base URL
+const API_BASE_URL = getApiBaseUrl();
+
+/**
+ * Get the appropriate API base URL based on environment
+ */
+function getApiBaseUrl() {
+    // Check if we're running on localhost (development)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '';  // Use relative URLs for local development
+    }
+    
+    // Production: frontend on Netlify, backend on Railway
+    return 'https://spacy-demos-production.up.railway.app';
+}
 
 // DOM Elements
 const corpusSelect = document.getElementById('corpus');
@@ -113,6 +126,8 @@ function handleCorpusChange() {
     const selectedCorpus = corpusSelect.value;
     currentCorpus = selectedCorpus;
     
+    console.log('Corpus selected:', selectedCorpus); // Debug log
+    
     if (selectedCorpus) {
         viewFileBtn.disabled = false;
     } else {
@@ -146,6 +161,8 @@ function hideMessages() {
  * Handle file viewing
  */
 async function handleViewFile() {
+    console.log('handleViewFile called, currentCorpus:', currentCorpus); // Debug log
+    
     if (!currentCorpus) {
         showError('Please select a corpus first');
         return;
@@ -154,7 +171,12 @@ async function handleViewFile() {
     try {
         hideAllSections();
         
-        const response = await fetch(`${API_BASE_URL}/view/${encodeURIComponent(currentCorpus)}`);
+        const url = `${API_BASE_URL}/view/${encodeURIComponent(currentCorpus)}`;
+        console.log('Fetching URL:', url); // Debug log
+        
+        const response = await fetch(url);
+        
+        console.log('Response status:', response.status); // Debug log
         
         if (!response.ok) {
             const errorData = await response.json();

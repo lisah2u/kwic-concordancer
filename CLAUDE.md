@@ -8,7 +8,7 @@ This file helps Claude understand your project and preferences.
 - Always use plan mode
 - After the plan has completed, write it to .claude/tasks/TASK_NAME.md
 - The plan should be a detailed implementation plan and reasoning for the task. Break tasks down.
-- If the tasks require external knowledge or a certain package, research to get the latest knowlesge.
+- If the tasks require external knowledge or a certain package, research to get the latest knowledge.
 - Don't overplan, think MVP. 
 - Once the plan has been written, ask me to review it. Don't move forward until I approve it.
 
@@ -29,11 +29,30 @@ Use `uv` for dependency management and virtual environment:
 
 ## Development Commands
 
+**Python Backend:**
 - Install dependencies: `uv pip install -r requirements.txt`
-- Start server: `uv run uvicorn concordance_api:app --reload`
-- Test: `uv run pytest test_concordance.py -v`
-- Lint: (none configured yet)
+- Start server: `uv run uvicorn concordance_api:app --reload` or `npm run dev`
+- Test: `uv run pytest test_concordance.py -v` or `npm run test-api`
+
+**Frontend Assets:**
+- Install frontend dependencies: `npm install`
+- Build CSS: `npm run build-css` (builds Tailwind CSS from src/input.css)
+- Watch CSS (during development): `npm run watch-css` (rebuilds on changes)
 - Access application: `http://localhost:8000`
+
+**Note:** Frontend uses Tailwind CSS v3 (local installation, production-ready)
+
+## Deployment Commands
+
+**Production Deployment:**
+- Build production assets: `npm run build` (minified CSS)
+- Deploy to Netlify: `npm run deploy-netlify` (requires Netlify CLI)
+- Deploy to Railway: `git push origin main` (automatic backend deployment)
+
+**Architecture:** Frontend (Netlify) + Backend (Railway)
+- Frontend serves static files with CDN
+- Backend provides FastAPI endpoints
+- Environment-aware API URLs (localhost vs production)
 
 ## Project Structure
 
@@ -47,5 +66,3 @@ Use `uv` for dependency management and virtual environment:
 - `concordance-prd.md` - Product requirements document
 
 ## Notes
-
-Add any important project-specific information, coding conventions, or preferences here.
