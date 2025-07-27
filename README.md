@@ -16,19 +16,36 @@ A modern corpus linguistics tool built with FastAPI and vanilla JavaScript, desi
 - **Fast Search**: Efficient pattern matching with customizable context size and case sensitivity
 - **Production Ready**: Deployed with security features and rate limiting
 
-## Quick Start
+## Repository Structure
 
-### Prerequisites
+```
+kwic-concordancer/
+├── frontend/              # Netlify deployment
+│   ├── index.html         # Main application interface
+│   ├── app.js             # Frontend JavaScript logic
+│   ├── tailwind.css       # Built CSS styles
+│   ├── package.json       # Node.js dependencies for Tailwind
+│   ├── netlify.toml       # Netlify configuration
+│   └── src/input.css      # CSS source file
+│
+├── backend/               # Railway deployment
+│   ├── main.py            # FastAPI application
+│   ├── samples/           # Corpus text files
+│   ├── requirements.txt   # Python dependencies
+│   ├── pyproject.toml     # Python project configuration
+│   ├── Procfile           # Railway start command
+│   └── runtime.txt        # Python version specification
+│
+└── README.md              # Project documentation
+```
 
-- Python 3.8+
-- `uv` package manager (recommended) or `pip`
+## Local Development
 
-### Installation
+### Backend (Python)
 
-1. Clone the repository:
+1. Navigate to backend directory:
 ```bash
-git clone <repository-url>
-cd kwic-concordancer
+cd backend
 ```
 
 2. Create and activate virtual environment:
@@ -42,50 +59,86 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
 ```
 
-### Running the Application
-
-1. Start the server:
+4. Start the server:
 ```bash
-uv run uvicorn concordance_api:app --reload
+python main.py
+# OR
+uv run uvicorn main:app --reload
 ```
 
-2. Open your browser to `http://localhost:8000`
+5. Backend runs at `http://localhost:8000`
 
-3. Select a corpus, view the file content, then search for patterns using the KWIC interface
+### Frontend (Static Files)
+
+1. Navigate to frontend directory:
+```bash
+cd frontend
+```
+
+2. Install Node.js dependencies:
+```bash
+npm install
+```
+
+3. Build CSS (for development):
+```bash
+npm run build-css
+```
+
+4. For development with CSS watching:
+```bash
+npm run watch-css
+```
+
+5. Serve frontend files using any static server or open `index.html` directly
 
 ## API Endpoints
 
-- `GET /` - Main application interface
-- `GET /corpora` - List available corpora
+**Base URL**: `https://kwic-concordancer-production.up.railway.app`
+
+- `GET /` - API status and information
+- `GET /api` - Detailed API status with samples info
+- `GET /corpora` - List available text corpora
+- `GET /search` - KWIC search with pagination
+  - Query params: `corpus`, `query`, `context_size`, `page`, `page_size`
 - `GET /view/{corpus}` - View full content of a corpus file
-- `GET /search-in-file/{corpus}` - Search within a specific corpus with KWIC results
+- `GET /search-in-file/{corpus}` - Search within specific corpus
+  - Query params: `query`, `case_sensitive`
+- `GET /cache/status` - Cache performance metrics
+- `POST /cache/clear` - Clear corpus cache
 
-## Development
+## Deployment
 
-### Running Tests
+### Architecture
 
-```bash
-uv run pytest test_concordance.py -v
-```
+- **Frontend**: Netlify (Static site deployment)
+  - Base directory: `frontend/`
+  - Build command: `npm run build-css`
+  - Deploy directory: `frontend/` (current directory)
 
-### Project Structure
+- **Backend**: Railway (Python app deployment)  
+  - Base directory: `backend/`
+  - Start command: `python main.py`
+  - Auto-deploys from `main` branch
 
-```
-├── concordance_api.py      # FastAPI backend
-├── static/
-│   ├── index.html         # Main interface
-│   └── app.js            # Frontend logic
-├── samples/              # Corpus files
-├── test_concordance.py   # Test suite
-└── pyproject.toml       # Dependencies
-```
+### Deployment Configuration
+
+**Netlify** (`frontend/netlify.toml`):
+- Builds Tailwind CSS
+- Proxies API calls to Railway backend
+- Includes security headers and caching
+
+**Railway** (`backend/Procfile`, `backend/runtime.txt`):
+- Python 3.13 runtime
+- Automatic dependency installation
+- Environment-based port configuration
 
 ## Technologies
 
-- **Backend**: FastAPI, Python 3.8+
-- **Frontend**: Vanilla JavaScript, Tailwind CSS
-- **Testing**: pytest, httpx
-- **Development**: uv package manager
+- **Backend**: FastAPI, Python 3.13, uvicorn
+- **Frontend**: Vanilla JavaScript, Tailwind CSS v3
+- **Deployment**: Netlify + Railway
+- **Development**: uv package manager, npm
 
 ## License
 

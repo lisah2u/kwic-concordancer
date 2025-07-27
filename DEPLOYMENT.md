@@ -21,7 +21,29 @@ This guide covers deploying the Concordancer application using Netlify (frontend
 2. **Netlify account** (free tier available)
 3. **Railway account** (free tier with usage limits)
 4. **Node.js 18+** for Tailwind CSS builds
-5. **Python 3.11+** and **uv** for backend
+5. **Python 3.13** for backend
+
+## Repository Structure (Updated)
+
+```
+kwic-concordancer/
+├── frontend/              # Netlify base directory
+│   ├── index.html         # Main app interface
+│   ├── app.js             # Frontend logic
+│   ├── tailwind.css       # Built CSS
+│   ├── package.json       # Node dependencies
+│   ├── netlify.toml       # Netlify config
+│   └── src/input.css      # CSS source
+│
+├── backend/               # Railway base directory
+│   ├── main.py            # FastAPI app
+│   ├── samples/           # Corpus files
+│   ├── requirements.txt   # Python dependencies
+│   ├── Procfile           # Start command
+│   └── runtime.txt        # Python version
+│
+└── README.md              # Documentation
+```
 
 ## Frontend Deployment (Netlify)
 
@@ -34,12 +56,16 @@ This guide covers deploying the Concordancer application using Netlify (frontend
 
 ### 2. Configure Build Settings
 
-Netlify will automatically detect the `netlify.toml` configuration:
+**IMPORTANT**: Set base directory to `frontend` in Netlify dashboard:
+
+1. Go to **Site Settings > Build & Deploy > Build Settings**
+2. Set **Base directory** to `frontend`
+3. Netlify will automatically detect the `netlify.toml` configuration:
 
 ```toml
 [build]
   command = "npm run build-css"
-  publish = "static"
+  publish = "."  # Current directory (frontend/)
 
 [build.environment]
   NODE_VERSION = "18"
@@ -70,16 +96,18 @@ Netlify will automatically detect the `netlify.toml` configuration:
 
 ### 2. Configure Environment
 
-Railway will automatically detect Python and use the `railway.toml` configuration:
+**IMPORTANT**: Set root directory to `backend` in Railway dashboard:
+
+1. Go to **Settings > General**
+2. Set **Root Directory** to `backend`
+3. Railway will automatically detect Python and use the configuration:
 
 ```toml
-[deploy]
-startCommand = "uv run uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
+# backend/Procfile
+web: python main.py
 
-[env]
-PORT = "8000"
-PYTHONPATH = "."
-UV_SYSTEM_PYTHON = "1"
+# backend/runtime.txt
+python-3.13
 ```
 
 ### 3. Environment Variables
