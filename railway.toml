@@ -21,7 +21,5 @@ UV_SYSTEM_PYTHON = "1"
 # Development vs Production environment detection
 RAILWAY_ENVIRONMENT = "${RAILWAY_ENVIRONMENT}"
 
-[build.watchPatterns]
-# Files to watch for rebuilds
-include = ["**/*.py", "requirements.txt", "pyproject.toml"]
-ignore = ["static/**", "samples/**", "test_*.py", "**/__pycache__/**"]
+# Watch patterns for rebuilds (array format)
+watchPaths = ["**/*.py", "requirements.txt", "pyproject.toml"]
