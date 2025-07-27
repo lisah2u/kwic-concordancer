@@ -1,14 +1,12 @@
+[build]
+builder = "nixpacks"
+
+[build.nixpacksPlan]
+providers = ["python"]
+
 [deploy]
-# Start command for Railway deployment
-startCommand = "python3 -m uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
+startCommand = "python -m uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
 
 [env]
-# Environment variables for Railway
 PORT = "8000"
 PYTHONPATH = "."
-
-# Development vs Production environment detection
-RAILWAY_ENVIRONMENT = "${RAILWAY_ENVIRONMENT}"
-
-# Watch patterns for rebuilds (array format)
-watchPaths = ["**/*.py", "requirements.txt", "pyproject.toml"]
