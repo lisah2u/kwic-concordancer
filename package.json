@@ -1,5 +1,5 @@
 {
-  "name": "spacy-demos",
+  "name": "kwic-concordancer",
   "version": "1.0.0",
   "description": "A modern corpus linguistics tool built with FastAPI and vanilla JavaScript, designed for classroom use and linguistic analysis.",
   "main": "index.js",

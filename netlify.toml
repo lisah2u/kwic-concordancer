@@ -12,46 +12,46 @@
 # Redirect API calls to Railway backend
 [[redirects]]
   from = "/api/*"
-  to = "https://spacy-demos-production.up.railway.app/api/:splat"
+  to = "https://kwic-concordancer-production.up.railway.app/api/:splat"
   status = 200
   force = true
 
 # Redirect search endpoints to Railway backend
 [[redirects]]
   from = "/search"
-  to = "https://spacy-demos-production.up.railway.app/search"
+  to = "https://kwic-concordancer-production.up.railway.app/search"
   status = 200
   force = true
 
 [[redirects]]
   from = "/search/*"
-  to = "https://spacy-demos-production.up.railway.app/search/:splat"
+  to = "https://kwic-concordancer-production.up.railway.app/search/:splat"
   status = 200
   force = true
 
 # Redirect corpus management to Railway backend
 [[redirects]]
   from = "/corpora"
-  to = "https://spacy-demos-production.up.railway.app/corpora"
+  to = "https://kwic-concordancer-production.up.railway.app/corpora"
   status = 200
   force = true
 
 [[redirects]]
   from = "/view/*"
-  to = "https://spacy-demos-production.up.railway.app/view/:splat"
+  to = "https://kwic-concordancer-production.up.railway.app/view/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/search-in-file/*"
-  to = "https://spacy-demos-production.up.railway.app/search-in-file/:splat"
+  to = "https://kwic-concordancer-production.up.railway.app/search-in-file/:splat"
   status = 200
   force = true
 
 # Redirect cache management to Railway backend
 [[redirects]]
   from = "/cache/*"
-  to = "https://spacy-demos-production.up.railway.app/cache/:splat"
+  to = "https://kwic-concordancer-production.up.railway.app/cache/:splat"
   status = 200
   force = true
 

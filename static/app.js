@@ -16,7 +16,7 @@ function getApiBaseUrl() {
     }
     
     // Production: frontend on Netlify, backend on Railway
-    return 'https://spacy-demos-production.up.railway.app';
+    return 'https://kwic-concordancer-production.up.railway.app';
 }
 
 // DOM Elements

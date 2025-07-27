@@ -30,7 +30,7 @@ This guide covers deploying the Concordancer application using Netlify (frontend
 1. Go to [Netlify](https://netlify.com) and sign in
 2. Click **"New site from Git"**
 3. Connect your GitHub/GitLab repository
-4. Select the `spacy-demos` repository
+4. Select the `kwic-concordancer` repository
 
 ### 2. Configure Build Settings
 
@@ -66,7 +66,7 @@ Netlify will automatically detect the `netlify.toml` configuration:
 1. Go to [Railway](https://railway.app) and sign in
 2. Click **"New Project"**
 3. Select **"Deploy from GitHub repo"**
-4. Choose your `spacy-demos` repository
+4. Choose your `kwic-concordancer` repository
 
 ### 2. Configure Environment
 
@@ -99,7 +99,7 @@ RAILWAY_ENVIRONMENT=production
    - Detect Python project
    - Install dependencies from `requirements.txt`
    - Start the FastAPI server
-2. Note your Railway app URL (e.g., `https://spacy-demos-production.up.railway.app`)
+2. Note your Railway app URL (e.g., `https://kwic-concordancer-production.up.railway.app`)
 
 ## Update Frontend for Production
 
@@ -113,7 +113,7 @@ function getApiBaseUrl() {
     if (window.location.hostname === 'localhost') {
         return '';  // Local development
     }
-    return 'https://spacy-demos-production.up.railway.app';  // Production
+    return 'https://kwic-concordancer-production.up.railway.app';  // Production
 }
 ```
 
