@@ -5,6 +5,7 @@ Backend implementation with FastAPI
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse
 from pydantic import BaseModel
@@ -12,8 +13,14 @@ from typing import List, Dict, Optional
 import spacy
 from pathlib import Path
 import re
+from functools import lru_cache
+import time
+from datetime import datetime
 
 app = FastAPI(title="Concordance API", description="A classroom-friendly concordancer")
+
+# Add compression middleware for better bandwidth usage
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware for frontend access
 app.add_middleware(
@@ -27,8 +34,12 @@ app.add_middleware(
 # spaCy model (placeholder for now)
 nlp = None
 
-# Corpus storage
+# Corpus storage with caching and metadata
 corpora: Dict[str, List[str]] = {}
+corpus_metadata: Dict[str, Dict] = {}
+
+# Pre-compiled regex for better tokenization performance
+TOKENIZE_REGEX = re.compile(r'\w+|[^\w\s]')
 
 # Mount static files
 static_path = Path("static")
@@ -50,6 +61,9 @@ class SearchResponse(BaseModel):
     corpus: str
     results: List[KWICResult]
     total_hits: int
+    page: int
+    page_size: int
+    total_pages: int
 
 
 class FileContent(BaseModel):
@@ -62,25 +76,56 @@ class FileContent(BaseModel):
 
 
 def load_corpus(corpus_name: str) -> List[str]:
-    """Load corpus from samples directory"""
+    """Load corpus from samples directory with intelligent caching"""
     corpus_path = Path("samples") / f"{corpus_name}.txt"
     
     if not corpus_path.exists():
         raise HTTPException(status_code=404, detail=f"Corpus '{corpus_name}' not found")
     
+    # Check if corpus is cached and file hasn't changed
+    file_stat = corpus_path.stat()
+    file_mtime = file_stat.st_mtime
+    file_size = file_stat.st_size
+    
+    if corpus_name in corpora and corpus_name in corpus_metadata:
+        cached_metadata = corpus_metadata[corpus_name]
+        if (cached_metadata.get('mtime') == file_mtime and 
+            cached_metadata.get('size') == file_size):
+            # File unchanged, return cached version
+            cached_metadata['access_count'] = cached_metadata.get('access_count', 0) + 1
+            cached_metadata['last_accessed'] = datetime.now().isoformat()
+            return corpora[corpus_name]
+    
+    # Load file (not cached or file changed)
     try:
+        start_time = time.time()
         with open(corpus_path, 'r', encoding='utf-8') as f:
-            # Tokenize per line as specified in PRD
             lines = [line.strip() for line in f.readlines() if line.strip()]
-            return lines
+        
+        load_time = time.time() - start_time
+        
+        # Cache the corpus and metadata
+        corpora[corpus_name] = lines
+        corpus_metadata[corpus_name] = {
+            'mtime': file_mtime,
+            'size': file_size,
+            'line_count': len(lines),
+            'load_time': load_time,
+            'loaded_at': datetime.now().isoformat(),
+            'access_count': 1,
+            'last_accessed': datetime.now().isoformat()
+        }
+        
+        return lines
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading corpus: {str(e)}")
 
 
 def tokenize_line(line: str) -> List[str]:
-    """Basic tokenization - split on whitespace and punctuation"""
-    # Simple tokenization for v1 - can be enhanced with spaCy later
-    tokens = re.findall(r'\w+|[^\w\s]', line)
+    """Optimized tokenization using pre-compiled regex"""
+    # Use pre-compiled regex for better performance
+    tokens = TOKENIZE_REGEX.findall(line)
     return tokens
 
 
@@ -114,10 +159,71 @@ async def frontend():
     """Frontend endpoint"""
     return FileResponse('static/index.html')
 
+@app.get("/app.js")
+async def serve_js():
+    """Serve JavaScript file at root level"""
+    return FileResponse('static/app.js', media_type='application/javascript')
+
+@app.get("/tailwind.css")
+async def serve_css():
+    """Serve Tailwind CSS file at root level"""
+    return FileResponse('static/tailwind.css', media_type='text/css')
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Serve favicon to prevent 404 errors"""
+    from fastapi.responses import Response
+    return Response(status_code=204)  # No content, but not a 404
+
 @app.get("/api")
 async def api_status():
     """API status endpoint"""
     return {"message": "Concordance API v1.0", "status": "running"}
+
+
+@app.get("/cache/status")
+async def cache_status():
+    """Cache status and performance metrics"""
+    cache_info = {}
+    total_memory_mb = 0
+    
+    for corpus_name, lines in corpora.items():
+        metadata = corpus_metadata.get(corpus_name, {})
+        # Rough memory estimation (chars * 1 byte + overhead)
+        memory_estimate = sum(len(line) for line in lines) / (1024 * 1024)  # MB
+        total_memory_mb += memory_estimate
+        
+        cache_info[corpus_name] = {
+            "line_count": len(lines),
+            "memory_mb": round(memory_estimate, 2),
+            "access_count": metadata.get('access_count', 0),
+            "loaded_at": metadata.get('loaded_at'),
+            "last_accessed": metadata.get('last_accessed'),
+            "load_time_ms": round(metadata.get('load_time', 0) * 1000, 2)
+        }
+    
+    return {
+        "cached_corpora": len(corpora),
+        "total_memory_mb": round(total_memory_mb, 2),
+        "cache_details": cache_info
+    }
+
+
+@app.post("/cache/clear")
+async def clear_cache(corpus: Optional[str] = None):
+    """Clear cache for specific corpus or all corpora"""
+    if corpus:
+        if corpus in corpora:
+            del corpora[corpus]
+            if corpus in corpus_metadata:
+                del corpus_metadata[corpus]
+            return {"message": f"Cache cleared for corpus '{corpus}'"}
+        else:
+            raise HTTPException(status_code=404, detail=f"Corpus '{corpus}' not found in cache")
+    else:
+        corpora.clear()
+        corpus_metadata.clear()
+        return {"message": "All cache cleared"}
 
 
 @app.get("/corpora")
@@ -135,23 +241,24 @@ async def list_corpora():
 async def search(
     corpus: str = Query(..., description="Corpus name to search"),
     query: str = Query(..., description="Search query"),
-    context_size: int = Query(5, description="Context size (words before/after match)")
+    context_size: int = Query(5, description="Context size (words before/after match)"),
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    page_size: int = Query(100, ge=1, le=1000, description="Results per page (max 1000)")
 ):
     """
-    Search endpoint - returns KWIC hits as JSON
+    Search endpoint - returns paginated KWIC hits as JSON
     Output format: { left: [...], match: [...], right: [...] }
     """
     if not query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     
-    # Load corpus if not already loaded
-    if corpus not in corpora:
-        corpora[corpus] = load_corpus(corpus)
+    # Load corpus (uses intelligent caching)
+    lines = load_corpus(corpus)
     
     results = []
     
     # Search through each line
-    for line_num, line in enumerate(corpora[corpus]):
+    for line_num, line in enumerate(lines):
         tokens = tokenize_line(line)
         kwic_result = search_kwic(tokens, query, context_size)
         
@@ -159,11 +266,27 @@ async def search(
             kwic_result.line_number = line_num + 1  # 1-indexed for display
             results.append(kwic_result)
     
+    # Calculate pagination
+    total_hits = len(results)
+    total_pages = (total_hits + page_size - 1) // page_size if total_hits > 0 else 0
+    
+    # Validate page number
+    if page > total_pages and total_pages > 0:
+        raise HTTPException(status_code=400, detail=f"Page {page} does not exist. Total pages: {total_pages}")
+    
+    # Apply pagination
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    paginated_results = results[start_idx:end_idx]
+    
     return SearchResponse(
         query=query,
         corpus=corpus,
-        results=results,
-        total_hits=len(results)
+        results=paginated_results,
+        total_hits=total_hits,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages
     )
 
 

@@ -80,3 +80,5 @@ logs/
 # Backup files
 *.bak
 *.backup
+node_modules/
+package-lock.json
