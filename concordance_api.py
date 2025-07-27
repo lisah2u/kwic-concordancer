@@ -22,8 +22,8 @@ from slowapi.errors import RateLimitExceeded
 
 app = FastAPI(title="Concordance API", description="A classroom-friendly concordancer")
 
-# Rate limiting setup
-limiter = Limiter(key_func=get_remote_address)
+# Rate limiting setup (in-memory storage for simplicity)
+limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
