@@ -154,29 +154,10 @@ def search_kwic(tokens: List[str], query: str, context_size: int = 5) -> Optiona
 
 @app.get("/")
 async def root():
-    """Root endpoint - serve frontend"""
-    return FileResponse('static/index.html')
+    """Root endpoint - API status"""
+    return {"message": "KWIC Concordancer API", "status": "running", "version": "1.0"}
 
-@app.get("/app")
-async def frontend():
-    """Frontend endpoint"""
-    return FileResponse('static/index.html')
-
-@app.get("/app.js")
-async def serve_js():
-    """Serve JavaScript file at root level"""
-    return FileResponse('static/app.js', media_type='application/javascript')
-
-@app.get("/tailwind.css")
-async def serve_css():
-    """Serve Tailwind CSS file at root level"""
-    return FileResponse('static/tailwind.css', media_type='text/css')
-
-@app.get("/favicon.ico")
-async def favicon():
-    """Serve favicon to prevent 404 errors"""
-    from fastapi.responses import Response
-    return Response(status_code=204)  # No content, but not a 404
+# Static file serving removed for Railway deployment
 
 @app.get("/api")
 async def api_status():
