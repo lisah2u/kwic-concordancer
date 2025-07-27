@@ -1,24 +1,6 @@
-[build]
-# Use Nixpacks for automatic detection
-nixpacks = true
-
-[build.nixpacksPlan]
-# Force Python detection despite package.json
-providers = ["python"]
-
-[build.nixpacksOptions]
-# Install Python dependencies
-installCmd = "pip install -r requirements.txt"
-
 [deploy]
 # Start command for Railway deployment
 startCommand = "python -m uvicorn concordance_api:app --host 0.0.0.0 --port $PORT"
-
-# Health check endpoint
-healthcheckPath = "/"
-healthcheckTimeout = 300
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 10
 
 [env]
 # Environment variables for Railway
