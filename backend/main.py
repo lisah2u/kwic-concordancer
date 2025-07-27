@@ -18,12 +18,21 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    import sys
+    from pathlib import Path
+    
     port = os.environ.get("PORT", "unknown")
+    cwd = str(Path.cwd())
+    files = list(Path(".").iterdir())
+    
     return {
         "message": "KWIC Concordancer API", 
         "status": "running",
         "port": port,
-        "environment": "railway"
+        "environment": "railway",
+        "python_version": sys.version,
+        "working_directory": cwd,
+        "files_in_directory": [str(f) for f in files[:10]]  # First 10 files
     }
 
 @app.get("/api")
