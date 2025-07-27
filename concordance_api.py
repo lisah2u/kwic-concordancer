@@ -16,16 +16,7 @@ import re
 from functools import lru_cache
 import time
 from datetime import datetime
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-
 app = FastAPI(title="Concordance API", description="A classroom-friendly concordancer")
-
-# Rate limiting setup (in-memory storage for simplicity)
-limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add compression middleware for better bandwidth usage
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -239,8 +230,7 @@ async def clear_cache(corpus: Optional[str] = None):
 
 
 @app.get("/corpora")
-@limiter.limit("30/minute")
-async def list_corpora(request: Request):
+async def list_corpora():
     """List available corpora"""
     samples_dir = Path("samples")
     if not samples_dir.exists():
@@ -251,9 +241,7 @@ async def list_corpora(request: Request):
 
 
 @app.get("/search", response_model=SearchResponse)
-@limiter.limit("60/minute")
 async def search(
-    request: Request,
     corpus: str = Query(..., description="Corpus name to search"),
     query: str = Query(..., description="Search query"),
     context_size: int = Query(5, description="Context size (words before/after match)"),
@@ -306,8 +294,7 @@ async def search(
 
 
 @app.get("/view/{corpus}", response_model=FileContent)
-@limiter.limit("20/minute")
-async def view_file(request: Request, corpus: str):
+async def view_file(corpus: str):
     """
     File viewing endpoint - returns full file content with metadata
     """
@@ -339,9 +326,7 @@ async def view_file(request: Request, corpus: str):
 
 
 @app.get("/search-in-file/{corpus}")
-@limiter.limit("60/minute")
 async def search_in_file(
-    request: Request,
     corpus: str,
     query: str = Query(..., description="Search query"),
     case_sensitive: bool = Query(False, description="Case sensitive search")
