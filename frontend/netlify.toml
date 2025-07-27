@@ -2,8 +2,8 @@
   # Build command to generate Tailwind CSS
   command = "npm run build-css"
   
-  # Directory to publish (static files only)
-  publish = "static"
+  # Directory to publish (current directory has static files)
+  publish = "."
 
 [build.environment]
   # Node.js version for Tailwind CSS build
