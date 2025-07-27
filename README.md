@@ -1,6 +1,11 @@
-# Concordancer Demo
+# KWIC Concordancer
 
 A modern corpus linguistics tool built with FastAPI and vanilla JavaScript, designed for classroom use and linguistic analysis.
+
+## 🌐 Live Demo
+
+- **Frontend**: https://kwic-concordancer.netlify.app/
+- **Backend API**: https://kwic-concordancer-production.up.railway.app/
 
 ## Features
 
@@ -9,6 +14,7 @@ A modern corpus linguistics tool built with FastAPI and vanilla JavaScript, desi
 - **Multiple Corpora**: Support for various text collections (currently includes Brown Corpus samples)
 - **Educational Focus**: Clean, intuitive interface designed for linguistics students and researchers
 - **Fast Search**: Efficient pattern matching with customizable context size and case sensitivity
+- **Production Ready**: Deployed with security features and rate limiting
 
 ## Quick Start
 

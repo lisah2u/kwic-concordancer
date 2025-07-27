@@ -202,21 +202,38 @@ Both platforms support automatic deployment:
 
 ## Security Considerations
 
-### CORS Configuration
+### Current Security Features ✅
+
+**CORS Configuration** (Read-only optimized):
 ```python
 # In concordance_api.py
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://your-netlify-site.netlify.app"],  # Update for production
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["*"],  # Allow all origins for educational use
+    allow_credentials=False,  # Secure with wildcard origins
+    allow_methods=["GET", "OPTIONS"],  # Read-only operations
     allow_headers=["*"],
 )
 ```
 
+**Rate Limiting** (Prevents abuse):
+- `/corpora` endpoint: 30 requests/minute
+- `/search` endpoints: 60 requests/minute  
+- `/view` endpoint: 20 requests/minute
+- Automatic 429 responses when limits exceeded
+
+**File Access Security**:
+- Path traversal protection (blocks `../`, `/`, `\`)
+- Restricted to `samples/` directory only
+- Input validation on corpus names
+
+**Production URLs**:
+- **Frontend**: https://kwic-concordancer.netlify.app/
+- **Backend**: https://kwic-concordancer-production.up.railway.app/
+
 ### HTTPS
-- Netlify: Automatic HTTPS with Let's Encrypt
-- Railway: Automatic HTTPS for all deployments
+- Netlify: Automatic HTTPS with Let's Encrypt ✅
+- Railway: Automatic HTTPS for all deployments ✅
 
 ## Troubleshooting
 
